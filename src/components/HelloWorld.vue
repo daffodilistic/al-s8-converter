@@ -82,6 +82,10 @@ export default {
       var charExperience = isNaN(parseInt(this.charXP))
         ? 0
         : parseInt(this.charXP);
+      if (charExperience < 0) {
+        charExperience = 0;
+      }
+
 
       // From MPMB: https://github.com/morepurplemorebetter/MPMBs-Character-Record-Sheet/blob/master/_variables/Lists.js
       var experiencePointsList = [
@@ -130,31 +134,39 @@ export default {
 
       if (experienceRemainder >= experiencePointsList[19]) {
         // Capped!
+        //console.log("Char is L20 and beyond!");
+        var returnValue = {
+          level: 20,
+          advancementPoints: {
+            normal: "You win D&D!",
+            slow: "You Win D&D!"
+          }
+        };
+      } else {
+        var shortfall =
+          experienceRemainder /
+          (experiencePointsList[nextCharLevel] -
+            experiencePointsList[nextCharLevel - 1]);
+        var advancementPoints = Math.round(
+          shortfall * tiers[currentTier].checkPoints
+        );
+
+        // console.log("Char level is " + nextCharLevel);
+        // console.log("Char Tier is " + (currentTier + 1));
+        // console.log("AP is " + advancementPoints);
+        // console.log("Next level XP is " + experiencePointsList[(nextCharLevel)]);
+        // console.log("Remainder is " + experienceRemainder);
+        // console.log("Shortfall % is " + shortfall);
+        // console.log(Utilities.formatString('Level %d, %f AP',nextCharLevel, advancementPoints));
+
+        var returnValue = {
+          level: nextCharLevel,
+          advancementPoints: {
+            normal: advancementPoints,
+            slow: advancementPoints / 2.0
+          }
+        };
       }
-
-      var shortfall =
-        experienceRemainder /
-        (experiencePointsList[nextCharLevel] -
-          experiencePointsList[nextCharLevel - 1]);
-      var advancementPoints = Math.round(
-        shortfall * tiers[currentTier].checkPoints
-      );
-
-      // console.log("Char level is " + nextCharLevel);
-      // console.log("Char Tier is " + (currentTier + 1));
-      // console.log("AP is " + advancementPoints);
-      // console.log("Next level XP is " + experiencePointsList[(nextCharLevel)]);
-      // console.log("Remainder is " + experienceRemainder);
-      // console.log("Shortfall % is " + shortfall);
-      // console.log(Utilities.formatString('Level %d, %f AP',nextCharLevel, advancementPoints));
-
-      var returnValue = {
-        level: nextCharLevel,
-        advancementPoints: {
-          normal: advancementPoints,
-          slow: advancementPoints / 2.0
-        }
-      };
 
       this.charData = returnValue;
     }
