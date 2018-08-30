@@ -127,7 +127,7 @@ export default {
           experienceRemainder = charExperience - amount;
         }
 
-        if (nextCharLevel + 1 > tiers[currentTier].levelLimit) {
+        if (nextCharLevel > tiers[currentTier].levelLimit) {
           currentTier++;
         }
       });
@@ -138,7 +138,7 @@ export default {
         var returnValue = {
           level: 20,
           advancementPoints: {
-            normal: "You win D&D!",
+            normal: "You Win D&D!",
             slow: "You Win D&D!"
           }
         };
