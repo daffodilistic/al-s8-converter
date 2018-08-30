@@ -10,10 +10,24 @@
                 </div>
                 <div class="row justify-content-center mt-4">
                   <div class="col-10 col-md-5 text-center my-auto">
-                    <label class="" for="charXp">Character Experience Points</label>
+                    <label class="" for="char-xp">Character Experience Points</label>
                   </div>
                   <div class="col-10 col-md-5">
-                    <input v-model="charXP" type="number" class="h-100 form-control" id="charXp" placeholder="17000">
+                    <input v-model="charXP" type="number" class="h-100 form-control" id="char-xp" placeholder="17000">
+                  </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                  <div class="col-10 col-md-5 text-center my-auto">
+                    <label class="" for="rounding-method">Rounding Method</label>
+                  </div>
+                  <div class="col-10 col-md-5">
+                    <select id="rounding-method" class="form-control" v-model="roundingMethod">
+                      <option v-for="(option) in roundingOptions" 
+                              v-bind:value="option.value"
+                              v-bind:key="option.value">
+                        {{ option.text }}
+                      </option>
+                    </select>
                   </div>
                 </div>
                 <div class="row justify-content-center mt-4">
@@ -53,9 +67,6 @@
                 <div class="col-5 text-center">Slow Advancement</div>
                 <div class="col-5"><b>{{ charData.advancementPoints.slow }}</b></div>
               </div>
-              <div class="row justify-content-center align-items-center mt-4">
-                <span class="text-fine-print">*NOTE:&nbsp;<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round" target="_blank">Default rounding</a>&nbsp;is used</span>
-              </div>
             </div>
           </div>
         </div>
@@ -69,6 +80,12 @@ export default {
   name: "HelloWorld",
   data: function() {
     return {
+      roundingOptions: [
+        { text: "Default (Common) Rounding", value: 0 },
+        { text: "Always Round Up", value: 1 },
+        { text: "Always Round Down", value: 2 }
+      ],
+      roundingMethod: 0,
       charXP: "",
       charData: {
         level: 0,
@@ -85,7 +102,6 @@ export default {
       if (charExperience < 0) {
         charExperience = 0;
       }
-
 
       // From MPMB: https://github.com/morepurplemorebetter/MPMBs-Character-Record-Sheet/blob/master/_variables/Lists.js
       var experiencePointsList = [
@@ -132,10 +148,17 @@ export default {
         }
       });
 
+      var returnValue = {
+        level: 0,
+        advancementPoints: {
+          normal: "",
+          slow: ""
+        }
+      };
       if (experienceRemainder >= experiencePointsList[19]) {
         // Capped!
         //console.log("Char is L20 and beyond!");
-        var returnValue = {
+        returnValue = {
           level: 20,
           advancementPoints: {
             normal: "You Win D&D!",
@@ -147,11 +170,21 @@ export default {
           experienceRemainder /
           (experiencePointsList[nextCharLevel] -
             experiencePointsList[nextCharLevel - 1]);
-        var advancementPoints = Math.round(
-          shortfall * tiers[currentTier].checkPoints
-        );
+        var advancementPoints = shortfall * tiers[currentTier].checkPoints;
 
-        // console.log("Char level is " + nextCharLevel);
+        switch (this.roundingMethod) {
+          case 0:
+            advancementPoints = Math.round(advancementPoints);
+            break;
+          case 1:
+            advancementPoints = Math.ceil(advancementPoints);
+            break;
+          case 2:
+            advancementPoints = Math.floor(advancementPoints);
+            break;
+        }
+
+        //console.log("Char level is " + nextCharLevel);
         // console.log("Char Tier is " + (currentTier + 1));
         // console.log("AP is " + advancementPoints);
         // console.log("Next level XP is " + experiencePointsList[(nextCharLevel)]);
@@ -159,7 +192,7 @@ export default {
         // console.log("Shortfall % is " + shortfall);
         // console.log(Utilities.formatString('Level %d, %f AP',nextCharLevel, advancementPoints));
 
-        var returnValue = {
+        returnValue = {
           level: nextCharLevel,
           advancementPoints: {
             normal: advancementPoints,
